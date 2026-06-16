@@ -4,6 +4,7 @@ import wasm from "vite-plugin-wasm";
 export default defineConfig({
   plugins: [wasm()],
   server: {
+    // plesk -> apache & ngnix settings -> custom headers -> added these manually
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin",
       "Cross-Origin-Embedder-Policy": "require-corp",

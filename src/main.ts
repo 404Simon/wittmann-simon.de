@@ -1,6 +1,6 @@
 import "./style.css";
 import { init, Terminal, FitAddon } from "ghostty-web";
-import { VimWasm } from "vim-wasm";
+import { VimWasm, checkBrowserCompatibility } from "vim-wasm";
 import { listDir, readFile, writeFile, resolvePath, resolveDir } from "./vfs.ts";
 
 await init();
@@ -192,6 +192,13 @@ function rmrf() {
 
 function cmdVim(args: string[]) {
   if (args.length === 0) { writeln("vim: missing file"); return; }
+
+  const compat = checkBrowserCompatibility();
+  if (compat) {
+    writeln("vim: " + compat);
+    return;
+  }
+
   const path = resolvePath(cwd, args[0]);
   const content = readFile(path) ?? "";
 
@@ -199,11 +206,20 @@ function cmdVim(args: string[]) {
   termContainer.style.display = "none";
   vimContainer.hidden = false;
 
-  vim = new VimWasm({
-    canvas: vimCanvas,
-    input: vimInput,
-    workerScriptPath: "/vim/vim.js",
-  });
+  try {
+    vim = new VimWasm({
+      canvas: vimCanvas,
+      input: vimInput,
+      workerScriptPath: "/vim/vim.js",
+    });
+  } catch (e) {
+    writeln("vim: failed to initialize: " + (e instanceof Error ? e.message : e));
+    vimContainer.hidden = true;
+    termContainer.style.display = "block";
+    fit.fit();
+    term.focus();
+    return;
+  }
 
   vim.onFileExport = (fpath, contents) => {
     const dec = new TextDecoder();
