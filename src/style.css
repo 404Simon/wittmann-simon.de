@@ -1,0 +1,65 @@
+@font-face {
+  font-family: "JetBrainsMonoNFM";
+  src: url("/fonts/JetBrainsMonoNerdFontMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "JetBrainsMonoNFM";
+  src: url("/fonts/JetBrainsMonoNerdFontMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "JetBrainsMonoNFM";
+  src: url("/fonts/JetBrainsMonoNerdFontMono-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "JetBrainsMonoNFM";
+  src: url("/fonts/JetBrainsMonoNerdFontMono-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  background: #1a1b26;
+  overflow: hidden;
+}
+
+#terminal {
+  height: 100%;
+}
+
+#vim-container {
+  height: 100%;
+  position: relative;
+}
+
+#vim-canvas {
+  display: block;
+}
+
+#vim-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: none;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
