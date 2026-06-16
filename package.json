@@ -11,5 +11,11 @@
   "devDependencies": {
     "typescript": "~6.0.2",
     "vite": "^8.0.12"
+  },
+  "dependencies": {
+    "ghostty-web": "^0.4.0",
+    "vim-wasm": "^0.0.13",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0"
   }
 }
