@@ -21,6 +21,11 @@ function file(content: string): File {
 const root: Dir = dir({
   home: dir({
     simon: dir({
+      ".ssh": dir({
+        "id_ed25519.pub": file(
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMiF2i/rAwQhsK9XCsUX0noZiL5i6miMYJ99fqvK6yCN\n"
+        ),
+      }),
       "about.txt": file(
         "Computer Science Masterstudent"
       ),
