@@ -67,9 +67,102 @@ function writeln(s: string) {
   term.write(s + "\r\n");
 }
 
-function prompt() {
+function promptStr() {
   const dir = cwd.replace(/^\/home\/simon/, "~");
-  w("\r\n\x1b[92m" + dir + "\x1b[0m $ ");
+  return "\x1b[92m" + dir + "\x1b[0m $ ";
+}
+
+function prompt() {
+  w("\r\n" + promptStr());
+}
+
+const COMMANDS = [
+  "help", "clear", "pwd", "whoami", "hostname", "date",
+  "uname", "echo", "ls", "cd", "cat", "vim", "rm",
+];
+
+function commonPrefix(strings: string[]): string {
+  if (strings.length === 0) return "";
+  let prefix = strings[0];
+  for (let i = 1; i < strings.length; i++) {
+    while (!strings[i].startsWith(prefix)) prefix = prefix.slice(0, -1);
+  }
+  return prefix;
+}
+
+function showMatches(matches: string[]) {
+  writeln(matches.map(m => "  " + m).join(""));
+  w(promptStr() + line);
+}
+
+function handleTab() {
+  const hasTrailingSpace = line.endsWith(" ");
+  const parts = line.trimEnd().split(/\s+/);
+
+  if (parts.length <= 1 && !hasTrailingSpace) {
+    const prefix = parts[0] ?? "";
+    const matches = COMMANDS.filter(c => c.startsWith(prefix));
+    if (matches.length === 0) return;
+
+    if (matches.length === 1) {
+      line = matches[0] + " ";
+      w("\r\x1b[2K" + promptStr() + line);
+      return;
+    }
+
+    const common = commonPrefix(matches);
+    if (common.length > prefix.length) {
+      line = common;
+      w("\r\x1b[2K" + promptStr() + line);
+      return;
+    }
+
+    showMatches(matches);
+    return;
+  }
+
+  const lastPart = hasTrailingSpace ? "" : parts[parts.length - 1];
+  const expanded = lastPart.replace(/^~/, "/home/simon");
+
+  let searchDir: string;
+  let prefix: string;
+
+  if (expanded.startsWith("/")) {
+    const slashIdx = expanded.lastIndexOf("/");
+    if (slashIdx === 0) { searchDir = "/"; prefix = expanded.slice(1); }
+    else { searchDir = expanded.slice(0, slashIdx); prefix = expanded.slice(slashIdx + 1); }
+  } else if (expanded.includes("/")) {
+    const slashIdx = expanded.lastIndexOf("/");
+    searchDir = resolvePath(cwd, expanded.slice(0, slashIdx));
+    prefix = expanded.slice(slashIdx + 1);
+  } else {
+    searchDir = cwd;
+    prefix = expanded;
+  }
+
+  const entries = listDir(searchDir);
+  if (!entries) return;
+
+  const matches = entries
+    .filter(e => e.name.startsWith(prefix))
+    .map(e => e.name + (e.type === "dir" ? "/" : ""));
+
+  if (matches.length === 0) return;
+
+  if (matches.length === 1) {
+    line += matches[0].slice(prefix.length) + " ";
+    w("\r\x1b[2K" + promptStr() + line);
+    return;
+  }
+
+  const common = commonPrefix(matches);
+  if (common.length > prefix.length) {
+    line += common.slice(prefix.length);
+    w("\r\x1b[2K" + promptStr() + line);
+    return;
+  }
+
+  showMatches(matches);
 }
 
 w("Type \x1b[33mhelp\x1b[0m for available commands.\r\n");
@@ -93,6 +186,8 @@ term.onData((data) => {
   } else if (data === "\f") {
     term.clear();
     prompt();
+  } else if (data === "\t") {
+    handleTab();
   } else if (data.length === 1 && data >= " ") {
     line += data;
     w(data);
