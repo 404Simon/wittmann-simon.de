@@ -53,7 +53,7 @@ export function render(): void {
 function renderHome(): void {
   app.innerHTML = shell("", `
     <section class="hero">
-      <p class="hero-tag">~/home</p>
+      <p class="hero-tag">/home/simon</p>
       <h1 class="hero-title">Servus! Ich bin <span class="accent">Simon.</span></h1>
       <p class="hero-sub">
         Computer Science Masterstudent who runs his website as a terminal.
