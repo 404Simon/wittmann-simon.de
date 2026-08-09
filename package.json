@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "ghostty-web": "^0.4.0",
+    "marked": "^18.0.9",
     "vim-wasm": "^0.0.13",
     "vite-plugin-wasm": "^3.6.0"
   }

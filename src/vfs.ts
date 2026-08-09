@@ -1,3 +1,5 @@
+import { files as content } from "./content.ts";
+
 interface Dir {
   type: "dir";
   children: Record<string, Node>;
@@ -18,32 +20,27 @@ function file(content: string): File {
   return { type: "file", content };
 }
 
-const root: Dir = dir({
-  home: dir({
-    simon: dir({
-      ".ssh": dir({
-        "id_ed25519.pub": file(
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMiF2i/rAwQhsK9XCsUX0noZiL5i6miMYJ99fqvK6yCN\n"
-        ),
-      }),
-      "about.txt": file(
-        "Computer Science Masterstudent"
-      ),
-      projects: dir({
-        "coming-soon.md": file(
-          "# projects\n" +
-          "Working on it..."
-        ),
-      }),
-      todo: file("- add cool stuff\n"),
-    }),
-  }),
-  tmp: dir({}),
-  var: dir({ log: dir({}) }),
-  etc: dir({
-    "passwd": file("")
-  })
+function buildTree(files: Record<string, string>): Dir {
+  const root: Dir = dir({});
+  for (const [path, content] of Object.entries(files)) {
+    const parts = path.replace(/^\/+/, "").split("/").filter(Boolean);
+    const name = parts.pop()!;
+    let node: Dir = root;
+    for (const part of parts) {
+      node.children[part] ??= dir({});
+      node = node.children[part] as Dir;
+    }
+    node.children[name] = file(content);
+  }
+  return root;
+}
+
+const root = buildTree({
+  ...content,
+  "/etc/passwd": "",
 });
+root.children.tmp = dir({});
+root.children.var = dir({ log: dir({}) });
 
 export function lookup(path: string): Node | undefined {
   const parts = path.replace(/^\/+/, "").split("/").filter(Boolean);
@@ -100,7 +97,10 @@ function normalize(path: string): string {
   const result: string[] = [];
   for (const p of parts) {
     if (p === ".") continue;
-    if (p === "..") { result.pop(); continue; }
+    if (p === "..") {
+      result.pop();
+      continue;
+    }
     result.push(p);
   }
   return "/" + result.join("/");
